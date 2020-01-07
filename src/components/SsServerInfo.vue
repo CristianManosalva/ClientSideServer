@@ -9,6 +9,12 @@
           <!-- <img :src="this.serverInfo.Logo" alt="logo server" /> INSERTAR IMAGEN DEL LOGO, UBICAR CON POSITION:ABSOLUTE-->
           <p class="card-text">Ssl Grade: {{ this.serverInfo.SslGrade }}
             <b-spinner variant="primary" v-if="this.showspinner" label="Spinning" style="width: 20px; height: 20px;"></b-spinner>
+
+
+
+
+
+
           </p>
           <p class="card-text">
             Previous Ssl Grade: {{ this.serverInfo.PreviousSslGrade }}
@@ -40,7 +46,8 @@ export default {
     return {
       domain: "",
       serverInfo: {
-        IsDown: true
+        IsDown: true,
+        idInterval: null
       }
     };
   },
@@ -60,30 +67,31 @@ export default {
     getServerData: async function() {
       await api
         .getServerInfo(this.domain)
-        .then(data => (this.serverInfo = data) /* console.log(data) */ );
-      if (this.serverInfo.SslGrade == "") {
-        setInterval(this.getSslGrade(), 10000)
+        .then(data => (this.serverInfo = data))
+
+      console.log(this.serverInfo)
+
+      if (this.serverInfo.SslGrade == "" && this.serverInfo.Endpoints != null) {
+        console.log("el grado: ", this.serverInfo.SslGrade)
+        console.log("Los: ", this.serverInfo.Endpoints)
+        this.idInterval = setInterval(function() { this.getSslGrade() }.bind(this), 5000)
       }
 
     },
 
     getSslGrade: async function() {
-      while (true) {
 
-        var rp = await api.getSslGrade(this.domain)
-        this.serverInfo.SslGrade = rp.SslGrade
-        for (var i = 0; i < this.serverInfo.Endpoints.length; i++) {
-          this.serverInfo.Endpoints[i].Grade = rp.Endpoints[i].Grade
-        }
-
-        console.log("Se llamo")
-
-        // if (rp.Status == "READY") {
-        //   break
-        // }
-
-        // api.sleep(50000)
+      var rp = await api.getSslGrade(this.domain)
+      this.serverInfo.SslGrade = rp.SslGrade
+      for (var i = 0; i < this.serverInfo.Endpoints.length; i++) {
+        this.serverInfo.Endpoints[i].Grade = rp.Endpoints[i].Grade
       }
+
+      if (rp.Status == "READY") {
+        clearInterval(this.idInterval);
+      }
+
+      console.log("Se llamo")
     }
   }
 };

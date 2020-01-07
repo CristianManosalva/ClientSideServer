@@ -50,16 +50,8 @@ async function getSslGrade(domino) {
   await fetch(`${url}/ConsultDomainSslGrade/${domino}`)
     .then(res => res.json())
     .then(res => rp = res)
+  console.log("El contenido de rp: ", rp)
   return rp
-}
-
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds) {
-      break;
-    }
-  }
 }
 
 export default {
@@ -67,6 +59,5 @@ export default {
   getServerInfo,
   getServersRecord,
   validDomain,
-  getSslGrade,
-  sleep
+  getSslGrade
 };
