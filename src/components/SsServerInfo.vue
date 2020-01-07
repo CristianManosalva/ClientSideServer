@@ -62,7 +62,7 @@ export default {
         .getServerInfo(this.domain)
         .then(data => (this.serverInfo = data) /* console.log(data) */ );
       if (this.serverInfo.SslGrade == "") {
-        this.getSslGrade()
+        setInterval(this.getSslGrade(), 10000)
       }
 
     },
@@ -76,11 +76,13 @@ export default {
           this.serverInfo.Endpoints[i].Grade = rp.Endpoints[i].Grade
         }
 
-        if (rp.Status == "READY") {
-          break
-        }
+        console.log("Se llamo")
 
-        api.sleep(50000)
+        // if (rp.Status == "READY") {
+        //   break
+        // }
+
+        // api.sleep(50000)
       }
     }
   }
