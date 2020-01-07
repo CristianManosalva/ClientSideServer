@@ -9,12 +9,6 @@
           <!-- <img :src="this.serverInfo.Logo" alt="logo server" /> INSERTAR IMAGEN DEL LOGO, UBICAR CON POSITION:ABSOLUTE-->
           <p class="card-text">Ssl Grade: {{ this.serverInfo.SslGrade }}
             <b-spinner variant="primary" v-if="this.showspinner" label="Spinning" style="width: 20px; height: 20px;"></b-spinner>
-
-
-
-
-
-
           </p>
           <p class="card-text">
             Previous Ssl Grade: {{ this.serverInfo.PreviousSslGrade }}
@@ -74,7 +68,7 @@ export default {
       if (this.serverInfo.SslGrade == "" && this.serverInfo.Endpoints != null) {
         console.log("el grado: ", this.serverInfo.SslGrade)
         console.log("Los: ", this.serverInfo.Endpoints)
-        this.idInterval = setInterval(function() { this.getSslGrade() }.bind(this), 5000)
+        this.idInterval = setInterval(function() { this.getSslGrade() }.bind(this), 50000)
       }
 
     },
