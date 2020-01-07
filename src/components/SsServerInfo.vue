@@ -7,7 +7,9 @@
             Servers Changed: {{ this.serverInfo.ServersChanged }}
           </p>
           <!-- <img :src="this.serverInfo.Logo" alt="logo server" /> INSERTAR IMAGEN DEL LOGO, UBICAR CON POSITION:ABSOLUTE-->
-          <p class="card-text">Ssl Grade: {{ this.serverInfo.SslGrade }}</p>
+          <p class="card-text">Ssl Grade: {{ this.serverInfo.SslGrade }}
+            <b-spinner variant="primary" v-if="this.showspinner" label="Spinning" style="width: 20px; height: 20px;"></b-spinner>
+          </p>
           <p class="card-text">
             Previous Ssl Grade: {{ this.serverInfo.PreviousSslGrade }}
           </p>
@@ -29,33 +31,6 @@
     </b-row>
   </b-container>
 </template>
-
-<!-- <b-container>
-    <b-row>
-      <b-col class="mb-5">
-        <b-card align="left">
-          <p class="card-text">
-            Servers Changed: {{ domain_info.ServersChanged }}
-          </p>
-          <p class="card-text">Ssl Grade: {{ domain_info.SslGrade }}</p>
-          <p class="card-text">
-            Previous Ssl Grade: {{ domain_info.PreviousSslGrade }}
-          </p>
-          <p class="card-text">Logo link: {{ domain_info.Logo }}</p>
-          <p class="card-text">Title Page: {{ domain_info.Title }}</p>
-          <p class="card-text">Server is Down: {{ domain_info.IsDown }}</p>
-        </b-card>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col>
-        <b-col>
-          <b-table striped hover :items="domain_info.Endpoints"></b-table>
-        </b-col>
-      </b-col>
-    </b-row>
-  </b-container> -->
-
 <script>
 import api from "@/api";
 
@@ -63,39 +38,16 @@ export default {
   name: "DomainInfo",
   data() {
     return {
+      domain: "",
       serverInfo: {
         IsDown: true
       }
-      /* serverInfo: {
-        Endpoints: [
-          {
-            Address: "serversIp",
-            SslGrade: "A+",
-            Country: "Us",
-            Owner: "Amazon Inc"
-          },
-          {
-            Address: "serversIp",
-            SslGrade: "A+",
-            Country: "Us",
-            Owner: "Amazon Inc"
-          },
-          {
-            Address: "serversIp",
-            SslGrade: "A+",
-            Country: "Us",
-            Owner: "Amazon Inc"
-          }
-        ],
-        ServersChanged: false,
-        SslGrade: "B",
-        PreviousSslGrade: "A",
-        Logo: "enlaceLogo",
-        Title: "TestingTitle",
-        IsDown: false
-      } */
-      // dating: {}
     };
+  },
+  computed: {
+    showspinner: function() {
+      return this.serverInfo.SslGrade == "";
+    }
   },
   created() {
     this.getDomain();
@@ -103,51 +55,36 @@ export default {
   },
   methods: {
     getDomain: function() {
-      const domain = this.$route.params.domain;
-      console.log(domain);
+      this.domain = this.$route.params.domain;
     },
-    getServerData: function() {
-      api
-        .getServerInfo()
-        .then(data => (this.serverInfo = data) /* console.log(data) */);
-    }
-  }
-  /* props: {
-    domain_info: {
-      type: Object,
-      default: function() {
-        return {
-          Endpoints: [
-            {
-              Address: "serversIp",
-              SslGrade: "A+",
-              Country: "Us",
-              Owner: "Amazon Inc"
-            },
-            {
-              Address: "serversIp",
-              SslGrade: "A+",
-              Country: "Us",
-              Owner: "Amazon Inc"
-            },
-            {
-              Address: "serversIp",
-              SslGrade: "A+",
-              Country: "Us",
-              Owner: "Amazon Inc"
-            }
-          ],
-          ServersChanged: false,
-          SslGrade: "B",
-          PreviousSslGrade: "A",
-          Logo: "enlaceLogo",
-          Title: "TitlePage",
-          IsDown: false
-        };
+    getServerData: async function() {
+      await api
+        .getServerInfo(this.domain)
+        .then(data => (this.serverInfo = data) /* console.log(data) */ );
+      if (this.serverInfo.SslGrade == "") {
+        this.getSslGrade()
+      }
+
+    },
+
+    getSslGrade: async function() {
+      while (true) {
+
+        var rp = await api.getSslGrade(this.domain)
+        this.serverInfo.SslGrade = rp.SslGrade
+        for (var i = 0; i < this.serverInfo.Endpoints.length; i++) {
+          this.serverInfo.Endpoints[i].Grade = rp.Endpoints[i].Grade
+        }
+
+        if (rp.Status == "READY") {
+          break
+        }
+
+        api.sleep(50000)
       }
     }
-  } */
+  }
 };
-</script>
 
+</script>
 <style scoped></style>

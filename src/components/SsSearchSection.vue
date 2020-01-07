@@ -4,41 +4,22 @@
       <b-row>
         <b-col>
           <section class="main-icon">
-            <img
-              src="https://logodownload.org/wp-content/uploads/2014/09/google-logo-1.png"
-              alt="Logo server"
-            />
+            <img src="https://res.cloudinary.com/duyflkcyn/image/upload/v1578296737/robot_main_cpxnfa.png" alt="Logo server" />
           </section>
         </b-col>
       </b-row>
       <b-row>
-        <b-col>
-          <section class="main-input">
-            <div class="main-input-container">
-              <span class="busqueda-icon"> </span>
-
-              <input type="text" />
-
-              <a class="micro-icon" href=""> </a>
-            </div>
-          </section>
+        <b-col cols="12" xs="9" sm="10" md="8" offset-md="1">
+          <b-form-input type="text" v-on:keyup="hola" v-on:keyup.enter="showServerInfo" v-on:click="hola" :state="valid" v-model="domain" placeholder="Ingresa el dominio del host"></b-form-input>
+          <p id="errorP" v-if="valid_text">El domino es invalido o el servidor esta caido</p>
         </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <section class="main-buttons">
-            <div>
-              <button v-on:click="showServerInfo">
-                Consultar
-              </button>
-            </div>
-          </section>
+        <b-col cols="12" class="main-search-botton-container-col" xs="3" sm="2" md="2" style="text-align: left;">
+          <b-button v-on:click="showServerInfo" variant="outline-info">Consultar</b-button>
         </b-col>
       </b-row>
     </b-container>
   </main>
 </template>
-
 <script>
 import api from "@/api";
 
@@ -47,26 +28,42 @@ export default {
   data() {
     return {
       domain: "",
-      assets: []
+      valid: null,
+      valid_text: false
     };
   },
   methods: {
-    showServerInfo: function(event) {
-      // api.getAssets().then(assets => (this.assets = assets));
-      // console.log(this.assets);
-      this.$router.push({
-        name: "server-detail",
-        params: { domain: "truora.com" }
-      });
+    showServerInfo: async function(event) {
+      if (this.domain != "") {
+        if (await api.validDomain(this.domain)) {
+          this.$router.push({
+            name: "server-detail",
+            params: { domain: this.domain }
+          });
+        } else {
+          this.valid = false;
+          this.valid_text = true;
+        }
+      }
+    },
+    hola: function() {
+      this.valid = null;
+      this.valid_text = false;
     }
   }
 };
+
 </script>
-
 <style scoped>
-main {
-  margin-top: 160px;
+#errorP {
+  color: red;
+  font-weight: lighter;
+  margin-top: 5px;
+  font-size: 12px;
+}
 
+main {
+  margin-top: 80px;
   text-align: center;
 }
 
@@ -77,9 +74,9 @@ main .main-icon {
 }
 
 main .main-icon img {
-  width: 272px;
+  width: 240px;
 
-  height: 92px;
+  height: 240px;
 }
 
 main .main-input {
@@ -193,4 +190,12 @@ main .main-buttons button:hover {
 
   color: #222;
 }
+
+@media (max-width: 576px) {
+  .main-search-botton-container-col {
+    text-align: center !important;
+    margin-top: 10px
+  }
+}
+
 </style>
